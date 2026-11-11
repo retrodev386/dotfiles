@@ -1,0 +1,428 @@
+# i3 config file(v4)
+# Please see https://i3wm.org/docs/userguide.html for a complete reference!
+
+# mod key/ special key configuration
+set $mod Mod4
+
+# application task bar font configuration
+font pango: Hack 11
+
+# replacing auto back_and_forth with manual key
+workspace_auto_back_and_forth no
+
+bindsym $mod+apostrophe workspace back_and_forth
+
+# disable focus follow applications
+focus_follows_mouse no
+
+# new container layout default
+workspace_layout default
+
+# app launching during full screen
+popup_during_fullscreen smart
+
+# i3start autostart on startup session
+exec --no-startup-id dex --autostart --environment i3
+
+# enable_tapping(touchpad="ASUE1300:00 04F3:3104")
+exec --no-startup-id xinput set-prop "ASUE1300:00 04F3:3104 Touchpad" "libinput Tapping Enabled" 1
+
+# volume autostart on startup session
+exec --no-startup-id sh -c 'python3 "$HOME/.local/bin/xob-volume.py" | /usr/local/bin/xob'
+
+# "better" lockscreen configuration, hotkey + startup app 
+bindsym $mod+F12 exec --no-startup-id ~/.config/i3/lock.sh
+exec --no-startup-id pgrep -x xautolock || xautolock -time 15 -locker "~/.config/i3/lock.sh" -detectsleep
+
+# duel monitor setup, hdmi as primary & eDp1 as secondary 
+exec --no-startup-id xrandr --output HDMI-1 --primary --mode 1920x1080 --rate 60 --left-of eDP-1
+
+# background_daemon xss-lock configuration
+exec --no-startup-id  pgrep -x xss-lock || xss-lock --transfer-sleep-lock -- ~/.config/i3/lock.sh
+
+# startup run_network_manager_tray_applet() 
+exec --no-startup-id pgrep -x nm-applet || nm-applet
+
+# startup mpd 
+exec --no-startup-id mpd
+
+# feh wallpaper configuration with sleep && exec
+exec_always --no-startup-id sh -c "sleep 1.5 && feh --bg-fill ~/Pictures/animecyber/fantasy-anime-style-scene.jpg"
+# exec_always --no-startup-id sh -c "sleep 1.5 && feh --bg-fill ~/Pictures/cyberPunk/prompted/magnific__lowangle-flat-2d-anime-cyberpunk-city-street-at-ni__14677.jpg"
+# exec_always --no-startup-id sh -c "sleep 1.5 && feh --bg-fill ~/Pictures/cyberPunk/prompted/magnific__flat-2d-anime-illustration-handinked-linework-narr__50190.jpg"
+# exec_always --no-startup-id sh -c "sleep 1.5 && feh --bg-fill ~/Pictures/cyberPunk/fantasy/fantasy-scene-anime-style2.jpg"
+
+# wezterm on startup
+# exec --no-startup-id pgrep -x wezterm-gui || wezterm start
+
+# picom compositor && copyq on startup
+# exec_always --no-startup-id sh -c 'pgrep -x picom || (sleep 1 && picom --config ~/.config/picom/picom.conf -b)'
+exec_always --no-startup-id sh -c 'pgrep -u "$USER" -x copyq >/dev/null || copyq'
+
+# custom picom on/off key binding .sh config
+bindsym $mod+Shift+o exec --no-startup-id ~/scripts/picom-toggle.sh
+
+#--------------------------------------------
+# configs - media keys vol, mic && bri
+#--------------------------------------------
+
+#adding config on top of i3blocks to redraw as widgets
+set $refresh_i3blocks pkill -RTMIN+10 i3blocks
+
+# config vol +
+bindsym XF86AudioRaiseVolume exec --no-startup-id \
+    pactl set-sink-volume @DEFAULT_SINK@ +10% && \
+    notify-send -t 1500 "🔊 Volume" "$(pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '\d+%' | head -1)" && \
+    $refresh_i3blocks
+
+# config vol -
+bindsym XF86AudioLowerVolume exec --no-startup-id \
+    pactl set-sink-volume @DEFAULT_SINK@ -10% && \
+    notify-send -t 1500 "🔊 Volume" "$(pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '\d+%' | head -1)" && \
+    $refresh_i3blocks
+
+# config vol mut
+bindsym XF86AudioMute exec --no-startup-id \
+    pactl set-sink-mute @DEFAULT_SINK@ toggle && \
+    notify-send -t 1500 "🔇 Volume" "$(pactl get-sink-mute @DEFAULT_SINK@ | grep -q yes && echo 'Muted' || echo 'Unmuted')" && \
+    $refresh_i3blocks
+
+# config hot key mic && config
+bindsym $mod+F11 exec --no-startup-id \
+    pactl set-source-mute @DEFAULT_SOURCE@ toggle && \
+    notify-send -t 1500 "🎤 Mic" "$(pactl get-source-mute @DEFAULT_SOURCE@ | grep -q yes && echo 'Muted' || echo 'Unmuted')" && \
+    $refresh_i3blocks
+
+# config bri + && with 0-100%
+bindsym XF86MonBrightnessUp exec --no-startup-id ~/.config/i3/brightness.sh up
+bindsym XF86MonBrightnessDown exec --no-startup-id ~/.confing/i3/brightness.sh down
+
+# float window app mod()
+floating_modifier $mod
+
+# tiling mod titlebar, float width x height
+tiling_drag modifier titlebar
+
+floating_minimum_size 75 x 50
+floating_maximum_size -1 x -1
+
+#--------------------------------
+# laucher hotkeys
+#--------------------------------
+bindsym $mod+Ctrl+Return exec --no-startup-id i3-sensible-terminal
+bindsym $mod+Return exec --no-startup-id wezterm
+bindsym $mod+slash exec --no-startup-id alacritty
+bindsym $mod+backslash exec --no-startup-id cool-retro-term
+
+# close app hotkey
+bindsym $mod+Shift+q kill
+
+#---------------------------------
+# rofi laucher && mods
+#---------------------------------
+bindsym $mod+d exec --no-startup-id rofi -show drun -theme ~/.config/rofi/config.rasi
+# bindsym --release $mod+p exec --no-startup-id ~/.config/rofi/power-menu.sh
+bindsym $mod+Shift+d exec --no-startup-id rofi -show filebrowser -theme ~/.config/rofi/config.rasi
+bindsym $mod+Shift+w exec --no-startup-id rofi -show window -theme ~/.config/rofi/config.rasi
+
+# app scratchpad mods - show && hide
+bindsym $mod+Shift+minus scratchpad show
+bindsym $mod+minus move scratchpad
+
+#--------------------------------------------------------------------
+# app window "mark" configs - stick, mark, focus && unmark
+#--------------------------------------------------------------------
+bindsym $mod+Shift+y sticky toggle
+bindsym $mod+F1 exec i3-input -F 'mark %s' -P 'Mark: '
+bindsym $mod+grave exec i3-input -F '[con_mark="%$"] focus' -P 'Goto: ' 
+bindsym $mod+F2 unmark
+
+#--------------------------------------------------------------------------------------------------------
+# tiling/non-tiling app focus / movement custom home-row mapping: j=left, k=down, l=up, ;=right
+# -------------------------------------------------------------------------------------------------------
+bindsym $mod+j focus left
+bindsym $mod+k focus down
+bindsym $mod+l focus up
+bindsym $mod+semicolon focus right
+
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+#---------------------------------------
+# apps manuel float config
+#---------------------------------------
+bindsym $mod+F5 floating enable; move position center
+bindsym $mod+F6 floating enable; move position 20 40, resize set 960 1020
+bindsym $mod+F7 floating enable; move position mouse
+
+bindsym $mod+F8 floating enable; resize set 1360 1020; move position 540 40
+
+#------------------------------------
+# move focus window dir -->
+#------------------------------------
+bindsym $mod+Shift+j move left
+bindsym $mod+Shift+k move down
+bindsym $mod+Shift+l move up
+bindsym $mod+Shift+semicolon move right
+
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# app split before lauch, && layout/ fullscreen configs
+bindsym $mod+h split h 
+bindsym $mod+v split v
+
+# app fullscreen toggle
+bindsym $mod+f fullscreen toggle
+
+#----------------------------------------------------------------------------
+# on key focused_container_layout = stack | tab | toggle_split window
+#----------------------------------------------------------------------------
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+# focused_window && floating_window config
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+
+# focus parent_container | child_container
+bindsym $mod+a focus parent
+bindsym $mod+Shift+a focus child
+
+# jump workspaces next / pre in-between
+bindsym $mod+Tab workspace next
+bindsym $mod+Shift+Tab workspace prev
+
+#------------------------------
+# app shortcuts
+#------------------------------
+bindsym $mod+Shift+m exec --no-startup-id spotify
+bindsym $mod+Shift+g exec --no-startup-id gedit
+bindsym $mod+Shift+t exec --no-startup-id thonny
+
+bindsym $mod+t exec --no-startup-id nemo
+bindsym $mod+g exec --no-startup-id geany
+bindsym $mod+F3 exec --no-startup-id copyq toggle
+
+bindsym $mod+Shift+b exec --no-startup-id qutebrowser
+bindsym $mod+Shift+f exec --no-startup-id GTK_THEME=light libreoffice
+bindsym $mod+p exec --no-startup-id flameshot gui
+
+# apps | terminal wrapper hotkeys
+bindsym $mod+n exec --no-startup-id wezterm -e newsboat
+bindsym $mod+m exec --no-startup-id wezterm -e ncmpcpp
+
+bindsym $mod+comma exec --no-startup-id wezterm -e btm
+
+#----------------------------------------------------------
+# i3 session resurrect save && restore layout
+#----------------------------------------------------------
+bindsym $mod+Shift+s exec --no-startup-id i3-resurrect save && notify-send -t 1500 "💾 Layout" "Saved"
+bindsym $mod+Ctrl+s exec --no-startup-id i3-resurrect restore && notify-send -t 1500 "♻️ Layout" "Restored"
+
+#------------------------------------------
+# using "assign" apps to workspaces
+#------------------------------------------
+assign [class="org.wezfurlong.wezterm"] $ws1
+
+for_window [class="cool-retro-term"] focus
+# for_window [class="Alacritty"] focus, border pixel 2, floating enable,  resize set 900 820, move position 900 50
+
+# browsers
+assign [class="firefox-dev"] $ws2
+assign [class="Brave-browser"] $ws2
+assign [class="qutebrowser"] $ws2
+
+# editors 
+for_window [class="Gedit"] floating enable
+assign [class="Geany"] $ws3
+
+for_window [class="Toplevel"] move to workspace $ws3, focus
+for_window [title="Scratch"] move to workspace $ws3, floating enable
+for_window [class="Code"] move to workspace $ws3, floating enable
+assign [class="jetbrains-rider"] $ws3
+for_window [class="Thonny"] floating enable, move to workspace $ws3, focus
+
+# docs
+assign [class="Evince"] $ws4
+for_window [class="libreoffice"] move to workspace $ws4, focus
+
+# productivity - tools
+for_window [class="Logseq"] move to workspace $ws5, floating enable, resize set 1420 820, move position 110 80, focus
+bindsym $mod+o exec --no-startup-id flatpak run com.logseq.Logseq
+
+for_window [class="copyq"] floating enable, no_focus
+
+# media apps
+for_window [class='Spotify'] floating enable, resize set 1100 720, move position 780 60, title_format "My Spotify", move to workspace $ws8, focus
+for_window [class='Rhythmbox'] move to workspace $ws8, floating enable, resize set 900 720, move position 1000 50
+
+#------------------------------
+# workspaces config 
+#------------------------------
+set $ws1 " 1 "
+set $ws2 " 2 "
+set $ws3 " 3 "
+set $ws4 " 4 "
+set $ws5 " 5 "
+set $ws6 " 6 "
+set $ws7 " 7 "
+set $ws8 " 8 "
+set $ws9 " 9 "
+set $ws10 " 10 "
+
+# go to workspace
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+bindsym $mod+5 workspace number $ws5
+bindsym $mod+6 workspace number $ws6
+bindsym $mod+7 workspace number $ws7
+bindsym $mod+8 workspace number $ws8
+bindsym $mod+9 workspace number $ws9
+bindsym $mod+0 workspace number $ws10
+
+# move app container to workspace
+bindsym $mod+Shift+1 move container to workspace number $ws1
+bindsym $mod+Shift+2 move container to workspace number $ws2
+bindsym $mod+Shift+3 move container to workspace number $ws3
+bindsym $mod+Shift+4 move container to workspace number $ws4
+bindsym $mod+Shift+5 move container to workspace number $ws5
+bindsym $mod+Shift+6 move container to workspace number $ws6
+bindsym $mod+Shift+7 move container to workspace number $ws7
+bindsym $mod+Shift+8 move container to workspace number $ws8
+bindsym $mod+Shift+9 move container to workspace number $ws9
+bindsym $mod+Shift+0 move container to workspace number $ws10
+
+# config multi monitor workspace move && focus
+#-----------------------------------------------------------
+bindsym $mod+y move workspace to output right 
+bindsym $mod+Ctrl+Shift+y move workspace to output left 
+
+bindsym $mod+Ctrl+semicolan focus output right 
+bindsym $mod+Ctrl+j focus output left
+
+# default workspace output per monitor 
+# workspace $ws1 output eDP-1
+# workspace $ws2 output HDMI-1
+
+#----------------------------
+# GAPS & BORDERS 
+#----------------------------
+gaps inner 8
+gaps outer 4
+
+# smart_gaps off
+smart_borders no_gaps
+
+# default_border pixel 2
+# default_floating_border pixel 2
+hide_edge_borders none
+
+#-----------------------------------------------------------
+# i3-session control config - reload && restart sessions
+#-----------------------------------------------------------
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+r restart
+
+# app resize mode 
+mode "resize" {
+    bindsym j resize shrink width 10 px or 10 ppt
+    bindsym k resize grow height 10 px or 10 ppt
+    bindsym l resize shrink height 10 px or 10 ppt
+    bindsym semicolon resize grow width 10 px or 10 ppt
+
+    bindsym Left resize shrink width 10 px or 10 ppt
+    bindsym Down resize grow height 10 px or 10 ppt
+    bindsym Up resize shrink height 10 px or 10 ppt
+    bindsym Right resize grow width 10 px or ppt
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+    bindsym $mod+r mode "default"
+}
+bindsym $mod+r mode "resize"
+
+#------------------------------------------------------------
+# focus mode one window visibility - switch tabbled, split && backforth
+#------------------------------------------------------------
+
+bindsym $mod+Shift+z layout tabbed
+bindsym $mod+Shift+v layout default
+bindsym $mod+Ctrl+z layout toggle split tabbed
+
+# ----------------------------------------------------------------------------
+# system mode - lock, exit, suspend, reboot, && off in one submenu
+# ----------------------------------------------------------------------------
+bindsym $mod+F4 mode "system: [l]ock [e]xit [s]uspend [r]eboot [o]ff"
+
+mode "system: [l]ock [e]xit [s]uspend [r]eboot [o]ff" {
+    bindsym l exec --no-startup-id ~/.config/i3/lock.sh, mode "default"
+    bindsym e exec --no-startup-id i3-msg exit
+    bindsym s exec systemctl suspend
+    bindsym r exec systemctl reboot
+    bindsym o exec systemctl poweroff
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+
+}
+
+# ------------------------------------------------------
+# custom notification pause / do not disturb mode
+# ------------------------------------------------------
+bindsym $mod+Ctrl+1 workspace $ws1; layout tabbed
+bindsym $mod+Ctrl+Shift+b exec --no-startup-id i3-msg '[workspace= " 2 "] kill' 
+bindsym $mod+Ctrl+Shift+n exec --no-startup-id dunstctl set-pause toggle
+bindsym $mod+Ctrl+Shift+m exec --no-startup-id pkill -x spotify
+
+# -----------------------------------------------------------------
+# compact status bar - use mode invisible for hide permanently
+# -----------------------------------------------------------------
+
+set $bg #0b0c1c
+set $accent #f0405c
+set $black #000000
+
+bar {
+    id mainbar
+    position top
+    mode dock
+    height 25
+    status_command i3blocks
+    font pango: Share Tech Mono 11
+    workspace_buttons yes
+    strip_workspace_numbers no
+    tray_output primary
+    tray_padding 6
+    separator_symbol |
+
+    colors {
+        background $bg
+        statusline $accent
+        separator #43F5A2
+
+        # class             border      background      text
+        focused_workspace   $accent     $accent         $bg
+        active_workspace    $accent     $bg             $accent
+        inactive_workspace  $black      $black          $accent
+        urgent_workspace    $accent     $accent         $black
+        binding_mode        $accent     $accent         $black
+
+    }
+
+}
+
+# class                     border      bg          text       indicator   child_border
+client.focused              $accent     $accent     $black     $accent     $accent
+client.focused_inactive     $black      $bg         $accent    $black      $black
+client.unfocused            $black      $bg         $accent    $black      $black
+client.urgent               $accent     $accent     $black     $accent     $accent
+client.placeholder          $accent     $bg         $accent    $black      $black
+client.background           $bg
+
